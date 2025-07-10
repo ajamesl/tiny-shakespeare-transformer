@@ -1,12 +1,12 @@
-# Tiny Shakespeare Generator
+# 🎭 Tiny Shakespeare Generator
 
 A FastAPI web application that generates a short Shakespearean dialogue using a trained transformer model.
 
-## 🌐 Live Demo
+## Deployed App
 
 **Try it now:** [http://65.109.84.92:8000/](http://65.109.84.92:8000/)
 
-## 🚀 Features
+## Features
 
 - **Modern Web Interface**: Clean, responsive UI with real-time text streaming
 - **Token-by-Token Streaming**: Watch text generate token by token
@@ -15,7 +15,7 @@ A FastAPI web application that generates a short Shakespearean dialogue using a 
 - **Docker Support**: Easy deployment with Docker and Docker Compose
 - **FastAPI Backend**: RESTful API with automatic documentation
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 tiny-shakespeare-generator/
@@ -107,7 +107,7 @@ tiny-shakespeare-generator/
    uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
    ```
 
-## 🎯 Usage
+## Usage
 
 ### Web Application
 
@@ -138,7 +138,7 @@ This endpoint returns a streaming response where each character is sent as it's 
 curl "http://localhost:8000/health"
 ```
 
-## 🧠 Model Architecture
+## Model Architecture
 
 The model uses a transformer architecture with:
 - **Embedding Dimension**: 384
@@ -147,14 +147,14 @@ The model uses a transformer architecture with:
 - **Context Length**: 256 tokens
 - **Dropout**: 0.2
 
-## 🔧 Configuration
+## Configuration
 
 Modify `src/config.py` to adjust:
 - Model hyperparameters
 - Training settings
 - Device selection (CPU/GPU/MPS)
 
-## 📊 Training
+## Training
 
 To train your own model:
 
@@ -166,7 +166,7 @@ To train your own model:
 3. **Monitor progress**: Training logs will show loss progression
 4. **Model saved**: Final model saved to `checkpoints/tiny_shakespeare.pt`
 
-## 🚀 Deployment
+## Deployment
 
 ### Local Development
 ```bash
@@ -180,11 +180,11 @@ docker-compose up --build
 
 The application will be available at `http://localhost:8000`
 
-## 📝 API Documentation
+## API Documentation
 
 Once running, visit `http://localhost:8000/docs` for interactive API documentation powered by FastAPI.
 
-## 🎨 UI Features
+## UI Features
 
 - **Modern Design**: Clean, responsive interface
 - **Real-time Streaming**: Watch text generate token by token
@@ -198,7 +198,7 @@ The project includes full Docker support:
 - `docker-compose.yml`: Easy development setup
 - `.dockerignore`: Optimized build context
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -206,11 +206,11 @@ The project includes full Docker support:
 4. Add tests if applicable
 5. Submit a pull request
 
-## 📜 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Based on the transformer architecture (decoder) from "Attention Is All You Need"
 - Trained on Shakespeare's works from Project Gutenberg
