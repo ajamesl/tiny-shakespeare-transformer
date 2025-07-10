@@ -8,7 +8,7 @@ import json
 
 # Add parent directory to path to import src modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from .inference import generate_text, generate_text_stream
+from .inference import generate_text_stream
 
 app = FastAPI(title="Shakespeare Text Generator", description="Generate Shakespeare-style text using a trained transformer model")
 
@@ -55,53 +55,6 @@ async def generate(
                 "Access-Control-Allow-Methods": "*"
             }
         )
-    except Exception as e:
-        return JSONResponse({
-            "success": False,
-            "error": str(e)
-        }, status_code=500)
-
-# API endpoint for simple GET request (non-streaming)
-@app.get("/generate/")
-async def generate_get(max_tokens: int = 300, seed_text: str = ""):
-    """Generate Shakespeare-style text via GET request (non-streaming)"""
-    try:
-        # Ensure reasonable limits
-        max_tokens = min(max(max_tokens, 50), 1000)  # Between 50 and 1000 tokens
-        
-        generated_text = generate_text(max_new_tokens=max_tokens, seed_text=seed_text)
-        
-        return JSONResponse({
-            "success": True,
-            "generated_text": generated_text,
-            "max_tokens": max_tokens,
-            "seed_text": seed_text
-        })
-    except Exception as e:
-        return JSONResponse({
-            "success": False,
-            "error": str(e)
-        }, status_code=500)
-
-# API endpoint for non-streaming POST request
-@app.post("/generate-batch/")
-async def generate_batch(
-    max_tokens: int = Form(300, description="Number of tokens to generate"),
-    seed_text: str = Form("", description="Optional seed text to start generation")
-):
-    """Generate Shakespeare-style text in batch mode (non-streaming)"""
-    try:
-        # Ensure reasonable limits
-        max_tokens = min(max(max_tokens, 50), 1000)  # Between 50 and 1000 tokens
-        
-        generated_text = generate_text(max_new_tokens=max_tokens, seed_text=seed_text)
-        
-        return JSONResponse({
-            "success": True,
-            "generated_text": generated_text,
-            "max_tokens": max_tokens,
-            "seed_text": seed_text
-        })
     except Exception as e:
         return JSONResponse({
             "success": False,

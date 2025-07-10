@@ -1,6 +1,6 @@
-# 🎭 Tiny Shakespeare Generator
+# Tiny Shakespeare Generator
 
-A modern FastAPI web application that generates Shakespearean text using a trained transformer model with real-time streaming capabilities.
+A FastAPI web application that generates a short Shakespearean dialogue using a trained transformer model.
 
 ## 🌐 Live Demo
 
@@ -9,9 +9,9 @@ A modern FastAPI web application that generates Shakespearean text using a train
 ## 🚀 Features
 
 - **Modern Web Interface**: Clean, responsive UI with real-time text streaming
-- **Token-by-Token Streaming**: Watch text generate character by character
+- **Token-by-Token Streaming**: Watch text generate token by token
 - **Configurable Generation**: Control the number of tokens (50-1000)
-- **Pre-trained Model**: Uses a transformer model trained on Shakespeare's works
+- **Pre-trained Model**: Uses a transformer model trained from scratch on Shakespeare's works
 - **Docker Support**: Easy deployment with Docker and Docker Compose
 - **FastAPI Backend**: RESTful API with automatic documentation
 
@@ -42,16 +42,29 @@ tiny-shakespeare-generator/
 ├── pyproject.toml        # Python project configuration
 ├── uv.lock              # Dependency lock file
 ├── requirements.txt      # Python dependencies
-└── run_app.py           # Application launcher
+└── README.md            # This file
 ```
 
 ## 🛠️ Installation
 
-### Option 1: Using uv (Recommended)
+### Option 1: Using Docker (Recommended)
 
 1. **Clone the repository**:
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/ajamesl/tiny-shakespeare-generator.git
+   cd tiny-shakespeare-generator
+   ```
+
+2. **Build and run with Docker Compose**:
+   ```bash
+   docker-compose up --build
+   ```
+
+### Option 2: Using uv (Development)
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/ajamesl/tiny-shakespeare-generator.git
    cd tiny-shakespeare-generator
    ```
 
@@ -65,11 +78,16 @@ tiny-shakespeare-generator/
    uv sync
    ```
 
-### Option 2: Using pip
+4. **Run the application**:
+   ```bash
+   uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+   ```
+
+### Option 3: Using pip (Development)
 
 1. **Clone the repository**:
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/ajamesl/tiny-shakespeare-generator.git
    cd tiny-shakespeare-generator
    ```
 
@@ -84,17 +102,9 @@ tiny-shakespeare-generator/
    pip install -r requirements.txt
    ```
 
-### Option 3: Using Docker
-
-1. **Clone the repository**:
+4. **Run the application**:
    ```bash
-   git clone <your-repo-url>
-   cd tiny-shakespeare-generator
-   ```
-
-2. **Build and run with Docker Compose**:
-   ```bash
-   docker-compose up --build
+   uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
    ```
 
 ## 🎯 Usage
@@ -103,37 +113,25 @@ tiny-shakespeare-generator/
 
 1. **Start the server**:
    ```bash
-   # Using uv
-   uv run python run_app.py
-   
-   # Using pip
-   python run_app.py
-   
-   # Using Docker
    docker-compose up
    ```
 
 2. **Open your browser** and navigate to `http://localhost:8000`
 
-3. **Generate text**:
+3. **Generate dialogue**:
    - Set the number of tokens to generate (50-1000, default: 500)
-   - Click "Generate Text" to see the results stream in real-time
+   - Click "Generate Dialogue" to see the results stream in real-time
 
 ### API Usage
 
-#### Generate Text with Streaming (POST)
+#### Generate Dialogue with Streaming (POST)
 ```bash
 curl -X POST "http://localhost:8000/generate/" \
      -H "Content-Type: application/x-www-form-urlencoded" \
-     -d "max_tokens=300"
+     -d "max_tokens=1000"
 ```
 
-#### Generate Text Batch (POST)
-```bash
-curl -X POST "http://localhost:8000/generate-batch/" \
-     -H "Content-Type: application/x-www-form-urlencoded" \
-     -d "max_tokens=300"
-```
+This endpoint returns a streaming response where each character is sent as it's generated in real-time using Server-Sent Events (SSE).
 
 #### Health Check
 ```bash
@@ -172,15 +170,10 @@ To train your own model:
 
 ### Local Development
 ```bash
-uv run python run_app.py
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### Production
-```bash
-uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
-```
-
-### Docker Deployment
+### Production (Docker)
 ```bash
 docker-compose up --build
 ```
@@ -193,15 +186,15 @@ Once running, visit `http://localhost:8000/docs` for interactive API documentati
 
 ## 🎨 UI Features
 
-- **Modern Design**: Clean, responsive interface with gradient backgrounds
-- **Real-time Streaming**: Watch text generate character by character
+- **Modern Design**: Clean, responsive interface
+- **Real-time Streaming**: Watch text generate token by token
 - **Error Handling**: Graceful error messages and loading states
 - **Responsive Layout**: Works on desktop and mobile devices
 
 ## 🐳 Docker Support
 
 The project includes full Docker support:
-- `Dockerfile`: Multi-stage build with Python 3.11
+- `Dockerfile`: Multi-stage build with Python 3.12
 - `docker-compose.yml`: Easy development setup
 - `.dockerignore`: Optimized build context
 
@@ -219,7 +212,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- Based on the transformer architecture from "Attention Is All You Need"
+- Based on the transformer architecture (decoder) from "Attention Is All You Need"
 - Trained on Shakespeare's works from Project Gutenberg
 - Inspired by Andrej Karpathy's educational content
 - Built with FastAPI and modern web technologies

@@ -28,35 +28,6 @@ def load_model():
     
     return _model, _itos, _device
 
-def generate_text(max_new_tokens=500, seed_text=""):
-    """Generate text from the model
-    
-    Args:
-        max_new_tokens (int): Number of tokens to generate
-        seed_text (str): Optional seed text to start generation
-        
-    Returns:
-        str: Generated text
-    """
-    model, itos, device = load_model()
-    
-    # Create context - start with empty context or encode seed text
-    if seed_text:
-        text, chars, stoi, itos_temp, encode, decode = utils.load_data()
-        try:
-            context = torch.tensor([encode(seed_text)], dtype=torch.long, device=device)
-        except KeyError:
-            # If seed text contains characters not in vocabulary, start with empty context
-            context = torch.zeros((1, 1), dtype=torch.long, device=device)
-    else:
-        context = torch.zeros((1, 1), dtype=torch.long, device=device)
-    
-    # Generate text
-    generated_tokens = model.generate(context, max_new_tokens=max_new_tokens)[0].tolist()
-    generated_text = ''.join([itos[token_id] for token_id in generated_tokens])
-    
-    return generated_text
-
 def generate_text_stream(max_new_tokens=1000, seed_text=""):
     """Generate text from the model with streaming support
     
@@ -106,8 +77,7 @@ if __name__ == "__main__":
     # For standalone execution
     import time
     print("Generated text:\n")
-    text = generate_text(max_new_tokens=500)
-    for char in text:
+    for char in generate_text_stream(max_new_tokens=500):
         print(char, end='', flush=True)
         time.sleep(0.015)
     print("\n")
