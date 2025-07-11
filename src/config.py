@@ -2,7 +2,9 @@ import torch
 
 _device = None  # internal cache
 
+
 def get_device():
+    """Determine and return the best available device for PyTorch computations."""
     global _device
     if _device is not None:
         return _device
@@ -16,6 +18,7 @@ def get_device():
 
     print(f"Using device: {_device}")
     return _device
+
 
 # Training hyperparameters
 BATCH_SIZE = 64

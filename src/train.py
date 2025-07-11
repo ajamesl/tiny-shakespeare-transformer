@@ -1,6 +1,9 @@
 import torch
 from tqdm import tqdm
-from src import config, model as M, utils
+
+from src import config
+from src import model as M
+from src import utils
 
 text, chars, stoi, itos, encode, decode = utils.load_data()
 vocab_size = len(chars)
@@ -11,18 +14,36 @@ device = config.get_device()
 model = M.BigramLanguageModel(vocab_size).to(device)
 optimizer = torch.optim.AdamW(model.parameters(), lr=config.LEARNING_RATE)
 
+
 def get_batch(split):
-    data_source = train_data if split == 'train' else val_data
+    """Generate a batch of input-target pairs for training or validation.
+
+    Args:
+        split (str): Either 'train' or 'val' to specify which dataset to sample from
+
+    Returns:
+        tuple: (x, y) where x is input sequences and y is target sequences,
+               both tensors of shape (BATCH_SIZE, BLOCK_SIZE)
+    """
+    data_source = train_data if split == "train" else val_data
     ix = torch.randint(len(data_source) - config.BLOCK_SIZE, (config.BATCH_SIZE,))
-    x = torch.stack([data_source[i:i + config.BLOCK_SIZE] for i in ix]).to(device)
-    y = torch.stack([data_source[i + 1:i + config.BLOCK_SIZE + 1] for i in ix]).to(device)
+    x = torch.stack([data_source[i : i + config.BLOCK_SIZE] for i in ix]).to(device)
+    y = torch.stack([data_source[i + 1 : i + config.BLOCK_SIZE + 1] for i in ix]).to(
+        device
+    )
     return x, y
+
 
 @torch.no_grad()
 def estimate_loss():
+    """Estimate the average loss on training and validation sets.
+
+    Returns:
+        dict: Dictionary with 'train' and 'val' keys containing average losses
+    """
     out = {}
     model.eval()
-    for split in ['train', 'val']:
+    for split in ["train", "val"]:
         losses = torch.zeros(config.EVAL_ITERS)
         for k in range(config.EVAL_ITERS):
             X, Y = get_batch(split)
@@ -32,12 +53,15 @@ def estimate_loss():
     model.train()
     return out
 
+
 for iter in tqdm(range(config.MAX_ITERS)):
     if iter % config.EVAL_INTERVAL == 0:
         losses = estimate_loss()
-        print(f"Step {iter}: Train Loss: {losses['train']:.4f}, Val Loss: {losses['val']:.4f}")
+        print(
+            f"Step {iter}: Train Loss: {losses['train']:.4f}, Val Loss: {losses['val']:.4f}"
+        )
 
-    xb, yb = get_batch('train')
+    xb, yb = get_batch("train")
     logits, loss = model(xb, yb)
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
