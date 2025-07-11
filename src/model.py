@@ -1,14 +1,18 @@
+"""Transformer model architecture components."""
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from . import config
 
+__all__ = ["Head", "MultiHeadAttention", "FeedForward", "Block", "BigramLanguageModel"]
+
 
 class Head(nn.Module):
     """One head of self-attention."""
 
-    def __init__(self, head_size):
+    def __init__(self, head_size: int) -> None:
         """Initialize a single attention head.
 
         Args:
@@ -24,18 +28,11 @@ class Head(nn.Module):
 
         self.dropout = nn.Dropout(config.DROPOUT)
 
-    def forward(self, x):
-        """Forward pass for single attention head.
-
-        Args:
-            x (torch.Tensor): Input tensor of shape (B, T, C)
-
-        Returns:
-            torch.Tensor: Output tensor of shape (B, T, C)
-        """
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass for single attention head."""
         B, T, C = x.shape
         k = self.key(x)
-        q = self.query(x)  
+        q = self.query(x)
 
         wei = (
             q @ k.transpose(-2, -1) * C ** -0.5
@@ -51,30 +48,16 @@ class Head(nn.Module):
 class MultiHeadAttention(nn.Module):
     """Multi-heads of self-attention in parallel."""
 
-    def __init__(self, num_heads, head_size):
-        """Initialize multi-head attention.
-
-        Args:
-            num_heads (int): Number of attention heads
-            head_size (int): Dimension of each attention head
-        """
+    def __init__(self, num_heads: int, head_size: int) -> None:
+        """Initialize multi-head attention."""
         super().__init__()
         self.heads = nn.ModuleList([Head(head_size) for _ in range(num_heads)])
         self.proj = nn.Linear(config.N_EMBD, config.N_EMBD)
         self.dropout = nn.Dropout(config.DROPOUT)
 
-    def forward(self, x):
-        """Forward pass for multi-head attention.
-
-        Args:
-            x (torch.Tensor): Input tensor of shape (B, T, C)
-
-        Returns:
-            torch.Tensor: Output tensor of shape (B, T, C)
-        """
-        out = torch.cat(
-            [h(x) for h in self.heads], dim=-1
-        )
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass for multi-head attention."""
+        out = torch.cat([h(x) for h in self.heads], dim=-1)
         out = self.proj(out)
         return out
 
@@ -82,12 +65,8 @@ class MultiHeadAttention(nn.Module):
 class FeedForward(nn.Module):
     """A simple linear layer followed by a non-linearity."""
 
-    def __init__(self, N_EMBD):
-        """Initialize feed-forward network.
-
-        Args:
-            N_EMBD (int): Embedding dimension
-        """
+    def __init__(self, N_EMBD: int) -> None:
+        """Initialize feed-forward network."""
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(N_EMBD, 4 * N_EMBD),
@@ -96,7 +75,7 @@ class FeedForward(nn.Module):
             nn.Dropout(config.DROPOUT),
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass for feed-forward network."""
         return self.net(x)
 
@@ -104,14 +83,8 @@ class FeedForward(nn.Module):
 class Block(nn.Module):
     """Transformer block: communication followed by computation."""
 
-    def __init__(self, n_embd, n_head):
-        """Initialize transformer block.
-
-        Args:
-            n_embd (int): Embedding dimension
-            n_head (int): Number of attention heads
-        """
-
+    def __init__(self, n_embd: int, n_head: int) -> None:
+        """Initialize transformer block."""
         super().__init__()
         head_size = n_embd // n_head
         self.sa_heads = MultiHeadAttention(n_head, head_size)
@@ -119,71 +92,39 @@ class Block(nn.Module):
         self.ln1 = nn.LayerNorm(n_embd)
         self.ln2 = nn.LayerNorm(n_embd)
 
-    def forward(self, x):
-        """Forward pass for transformer block.
-
-        Args:
-            x (torch.Tensor): Input tensor of shape (B, T, C)
-
-        Returns:
-            torch.Tensor: Output tensor of shape (B, T, C)
-        """
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass for transformer block."""
         x = x + self.sa_heads(self.ln1(x))
         x = x + self.ffwd(self.ln2(x))
         return x
 
 
 class BigramLanguageModel(nn.Module):
-    def __init__(self, vocab_size):
-        """Initialize the Bigram Language Model.
-
-        Args:
-            vocab_size (int): Size of the vocabulary
-        """
+    def __init__(self, vocab_size: int) -> None:
+        """Initialize the Bigram Language Model."""
         super().__init__()
         self.token_embedding_table = nn.Embedding(vocab_size, config.N_EMBD)
-        self.position_embedding_table = nn.Embedding(
-            config.BLOCK_SIZE, config.N_EMBD
-        )
+        self.position_embedding_table = nn.Embedding(config.BLOCK_SIZE, config.N_EMBD)
         self.blocks = nn.Sequential(
             *[Block(config.N_EMBD, n_head=config.N_HEAD) for _ in range(config.N_LAYER)]
         )
         self.ln_f = nn.LayerNorm(config.N_EMBD)
-        self.lm_head = nn.Linear(
-            config.N_EMBD, vocab_size
-        )
+        self.lm_head = nn.Linear(config.N_EMBD, vocab_size)
 
-    def forward(self, idx, targets=None):
-        """Forward pass for the language model.
-
-        Args:
-            idx (torch.Tensor): Input token indices of shape (B, T)
-            targets (torch.Tensor, optional): Target token indices of shape (B, T)
-
-        Returns:
-            tuple: (logits, loss) where logits has shape (B, T, vocab_size)
-                   and loss is None if targets not provided
-        """
+    def forward(
+        self, idx: torch.Tensor, targets: torch.Tensor = None
+    ) -> tuple[torch.Tensor, torch.Tensor | None]:
+        """Forward pass for the language model."""
         B, T = idx.shape
 
-        tok_emb = self.token_embedding_table(
-            idx
-        )
+        tok_emb = self.token_embedding_table(idx)
         pos_emb = self.position_embedding_table(
             torch.arange(T, device=config.get_device())
         )  # (T, C)
-        x = (
-            tok_emb + pos_emb
-        )
-        x = self.blocks(
-            x
-        )
-        x = self.ln_f(
-            x
-        )
-        logits = self.lm_head(
-            x
-        )
+        x = tok_emb + pos_emb
+        x = self.blocks(x)
+        x = self.ln_f(x)
+        logits = self.lm_head(x)
 
         if targets is None:
             loss = None
@@ -195,16 +136,8 @@ class BigramLanguageModel(nn.Module):
 
         return logits, loss
 
-    def generate(self, idx, max_new_tokens):
-        """Generate new tokens autoregressively.
-
-        Args:
-            idx (torch.Tensor): Starting context of shape (B, T)
-            max_new_tokens (int): Number of new tokens to generate
-
-        Returns:
-            torch.Tensor: Extended sequence of shape (B, T + max_new_tokens)
-        """
+    def generate(self, idx: torch.Tensor, max_new_tokens: int) -> torch.Tensor:
+        """Generate new tokens autoregressively."""
         for _ in range(max_new_tokens):
             idx_cond = idx[:, -config.BLOCK_SIZE :]
             logits, loss = self(idx_cond)

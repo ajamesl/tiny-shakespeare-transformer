@@ -1,5 +1,8 @@
+"""Text generation inference functions for the Shakespeare model."""
+
 import os
 import sys
+from typing import Iterator
 
 import torch
 import torch.nn.functional as F
@@ -9,13 +12,15 @@ from src import config
 from src import model as M
 from src import utils
 
+__all__ = ["load_model", "generate_text_stream"]
+
 # Global variables for model and utilities
 _model = None
 _itos = None
 _device = None
 
 
-def load_model():
+def load_model() -> tuple[M.BigramLanguageModel, dict[int, str], str]:
     """Load the model and utilities once with caching.
 
     Returns:
@@ -39,16 +44,10 @@ def load_model():
     return _model, _itos, _device
 
 
-def generate_text_stream(max_new_tokens=1000, seed_text=""):
-    """Generate text from the model with streaming support
-
-    Args:
-        max_new_tokens (int): Number of tokens to generate
-        seed_text (str): Optional seed text to start generation
-
-    Yields:
-        str: Generated characters one by one
-    """
+def generate_text_stream(
+    max_new_tokens: int = 1000, seed_text: str = ""
+) -> Iterator[str]:
+    """Generate text from the model with streaming support."""
     model, itos, device = load_model()
 
     if seed_text:
@@ -80,7 +79,7 @@ if __name__ == "__main__":
     import time
 
     print("Generated text:\n")
-    for char in generate_text_stream(max_new_tokens=500):
+    for char in generate_text_stream(max_new_tokens=800):
         print(char, end="", flush=True)
         time.sleep(0.015)
     print("\n")

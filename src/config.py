@@ -1,8 +1,25 @@
+"""Configuration module for model and training hyperparameters."""
+
 import torch
+
+__all__ = [
+    "get_device",
+    "BATCH_SIZE",
+    "BLOCK_SIZE",
+    "MAX_ITERS",
+    "EVAL_INTERVAL",
+    "LEARNING_RATE",
+    "EVAL_ITERS",
+    "N_EMBD",
+    "N_HEAD",
+    "N_LAYER",
+    "DROPOUT",
+]
 
 _device = None  # Internal cache to prevent repeated device checks/prints
 
-def get_device():
+
+def get_device() -> str:
     """Determine and return the best available device for PyTorch computations."""
     global _device
     if _device is not None:

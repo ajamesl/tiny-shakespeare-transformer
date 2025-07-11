@@ -1,6 +1,9 @@
+"""FastAPI web application for Shakespeare text generation."""
+
 import json
 import os
 import sys
+from typing import Union
 
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
@@ -8,6 +11,8 @@ from fastapi.templating import Jinja2Templates
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from .inference import generate_text_stream
+
+__all__ = ["app"]
 
 app = FastAPI(
     title="Shakespeare Text Generator",
@@ -19,16 +24,16 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "..", "templates"))
 
 
 @app.get("/", response_class=HTMLResponse)
-def index(request: Request):
+def index(request: Request) -> HTMLResponse:
     """Serve the main web interface."""
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.post("/generate/")
+@app.post("/generate/", response_model=None)
 async def generate(
     max_tokens: int = Form(300, description="Number of tokens to generate"),
     seed_text: str = Form("", description="Optional seed text to start generation"),
-):
+) -> Union[StreamingResponse, JSONResponse]:
     """Generate Shakespeare-style text with streaming."""
     try:
         max_tokens = min(max(max_tokens, 50), 1000)
@@ -60,7 +65,7 @@ async def generate(
 
 
 @app.get("/health")
-def health_check():
+def health_check() -> dict[str, str]:
     """Health check endpoint to verify the service is running."""
     return {"status": "healthy", "message": "Shakespeare Text Generator is running"}
 

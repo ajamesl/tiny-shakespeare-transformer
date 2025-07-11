@@ -1,9 +1,13 @@
+"""Training script for the Shakespeare text generator model."""
+
 import torch
 from tqdm import tqdm
 
 from src import config
 from src import model as M
 from src import utils
+
+__all__ = ["get_batch", "estimate_loss"]
 
 text, chars, stoi, itos, encode, decode = utils.load_data()
 vocab_size = len(chars)
@@ -15,16 +19,8 @@ model = M.BigramLanguageModel(vocab_size).to(device)
 optimizer = torch.optim.AdamW(model.parameters(), lr=config.LEARNING_RATE)
 
 
-def get_batch(split):
-    """Generate a batch of input-target pairs for training or validation.
-
-    Args:
-        split (str): Either 'train' or 'val' to specify which dataset to sample from
-
-    Returns:
-        tuple: (x, y) where x is input sequences and y is target sequences,
-               both tensors of shape (BATCH_SIZE, BLOCK_SIZE)
-    """
+def get_batch(split: str) -> tuple[torch.Tensor, torch.Tensor]:
+    """Generate a batch of input-target pairs for training or validation."""
     data_source = train_data if split == "train" else val_data
     ix = torch.randint(len(data_source) - config.BLOCK_SIZE, (config.BATCH_SIZE,))
     x = torch.stack([data_source[i : i + config.BLOCK_SIZE] for i in ix]).to(device)
@@ -35,12 +31,8 @@ def get_batch(split):
 
 
 @torch.no_grad()
-def estimate_loss():
-    """Estimate the average loss on training and validation sets.
-
-    Returns:
-        dict: Dictionary with 'train' and 'val' keys containing average losses
-    """
+def estimate_loss() -> dict[str, torch.Tensor]:
+    """Estimate the average loss on training and validation sets."""
     out = {}
     model.eval()
     for split in ["train", "val"]:
