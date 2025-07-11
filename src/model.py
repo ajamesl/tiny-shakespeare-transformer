@@ -34,16 +34,16 @@ class Head(nn.Module):
             torch.Tensor: Output tensor of shape (B, T, C)
         """
         B, T, C = x.shape
-        k = self.key(x)  # Shape: (B, T, C)
-        q = self.query(x)  # Shape: (B, T, C)
-        # Compute attention scores ("affinities")
+        k = self.key(x)
+        q = self.query(x)  
+
         wei = (
             q @ k.transpose(-2, -1) * C ** -0.5
         )  # (B, T, 16) @ (B, 16, T) ---> (B, T, T)
         wei = wei.masked_fill(self.tril[:T, :T] == 0, float("-inf"))  # (B, T, T)
         wei = F.softmax(wei, dim=-1)  # (B, T, T)
-        wei = self.dropout(wei)  # Apply dropout to attention weights
-        v = self.value(x)  # Shape: (B, T, C)
+        wei = self.dropout(wei)
+        v = self.value(x)  # (B, T, C)
         out = wei @ v  # (B, T, T) @ (B, T, C) ---> (B, T, C)
         return out
 
@@ -74,7 +74,7 @@ class MultiHeadAttention(nn.Module):
         """
         out = torch.cat(
             [h(x) for h in self.heads], dim=-1
-        )  # Concatenate the outputs of all heads
+        )
         out = self.proj(out)
         return out
 
@@ -93,18 +93,11 @@ class FeedForward(nn.Module):
             nn.Linear(N_EMBD, 4 * N_EMBD),
             nn.ReLU(),
             nn.Linear(4 * N_EMBD, N_EMBD),
-            nn.Dropout(config.DROPOUT),  # Optional: dropout for regularization
+            nn.Dropout(config.DROPOUT),
         )
 
     def forward(self, x):
-        """Forward pass for feed-forward network.
-
-        Args:
-            x (torch.Tensor): Input tensor
-
-        Returns:
-            torch.Tensor: Output tensor
-        """
+        """Forward pass for feed-forward network."""
         return self.net(x)
 
 
@@ -118,13 +111,13 @@ class Block(nn.Module):
             n_embd (int): Embedding dimension
             n_head (int): Number of attention heads
         """
-        # N_EMBD: embeddings dimension, N_HEAD: number of heads we want
+
         super().__init__()
         head_size = n_embd // n_head
         self.sa_heads = MultiHeadAttention(n_head, head_size)
         self.ffwd = FeedForward(n_embd)
-        self.ln1 = nn.LayerNorm(n_embd)  # Layer normalization for self-attention
-        self.ln2 = nn.LayerNorm(n_embd)  # Layer normalization for feed-forward network
+        self.ln1 = nn.LayerNorm(n_embd)
+        self.ln2 = nn.LayerNorm(n_embd)
 
     def forward(self, x):
         """Forward pass for transformer block.
@@ -148,18 +141,17 @@ class BigramLanguageModel(nn.Module):
             vocab_size (int): Size of the vocabulary
         """
         super().__init__()
-        # Each token directly reads off the logits for the next token from a lookup table
         self.token_embedding_table = nn.Embedding(vocab_size, config.N_EMBD)
         self.position_embedding_table = nn.Embedding(
             config.BLOCK_SIZE, config.N_EMBD
-        )  # Optional: position embeddings
+        )
         self.blocks = nn.Sequential(
             *[Block(config.N_EMBD, n_head=config.N_HEAD) for _ in range(config.N_LAYER)]
-        )  # Stack of transformer blocks
-        self.ln_f = nn.LayerNorm(config.N_EMBD)  # Final layer normalization
+        )
+        self.ln_f = nn.LayerNorm(config.N_EMBD)
         self.lm_head = nn.Linear(
             config.N_EMBD, vocab_size
-        )  # Linear layer to project embeddings to logits
+        )
 
     def forward(self, idx, targets=None):
         """Forward pass for the language model.
@@ -172,27 +164,26 @@ class BigramLanguageModel(nn.Module):
             tuple: (logits, loss) where logits has shape (B, T, vocab_size)
                    and loss is None if targets not provided
         """
-        B, T = idx.shape  # B: batch size, T: block size
+        B, T = idx.shape
 
-        # idx and targets are both (batch_size, BLOCK_SIZE) / (B, T) tensor of integers
         tok_emb = self.token_embedding_table(
             idx
-        )  # Shape: (batch_size, BLOCK_SIZE, vocab_size) / (B, T, C)
+        )
         pos_emb = self.position_embedding_table(
             torch.arange(T, device=config.get_device())
-        )  # Shape: (BLOCK_SIZE, N_EMBD) / (T, C)
+        )  # (T, C)
         x = (
             tok_emb + pos_emb
-        )  # Combine token and position embeddings - Shape: (batch_size, BLOCK_SIZE, N_EMBD) / (B, T, C)
+        )
         x = self.blocks(
             x
-        )  # Pass through transformer blocks - Shape: (batch_size, BLOCK_SIZE, N_EMBD) / (B, T, C)
+        )
         x = self.ln_f(
             x
-        )  # Final layer normalization - Shape: (batch_size, BLOCK_SIZE, N_EMBD) / (B, T, C)
+        )
         logits = self.lm_head(
             x
-        )  # Shape: (batch_size, BLOCK_SIZE, vocab_size) / (B, T, C)
+        )
 
         if targets is None:
             loss = None
@@ -214,18 +205,11 @@ class BigramLanguageModel(nn.Module):
         Returns:
             torch.Tensor: Extended sequence of shape (B, T + max_new_tokens)
         """
-        # idx is (batch_size, BLOCK_SIZE) / (B, T) array of indices in the current context
         for _ in range(max_new_tokens):
-            # Crop idx to the last BLOCK_SIZE tokens
             idx_cond = idx[:, -config.BLOCK_SIZE :]
-            # Get the predictions
             logits, loss = self(idx_cond)
-            # Focus only on the last time step
-            logits = logits[:, -1, :]  # Becomes (B, C)
-            # Apply softmax to get probabilities
-            probs = F.softmax(logits, dim=-1)  # (B, C)
-            # Sample from the distribution
-            idx_next = torch.multinomial(probs, num_samples=1)  # (B, 1)
-            # Append sampled index to the running sequence
-            idx = torch.cat((idx, idx_next), dim=1)  # (B, T+1)
+            logits = logits[:, -1, :]
+            probs = F.softmax(logits, dim=-1)
+            idx_next = torch.multinomial(probs, num_samples=1)
+            idx = torch.cat((idx, idx_next), dim=1)
         return idx

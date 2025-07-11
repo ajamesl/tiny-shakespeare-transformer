@@ -1,7 +1,6 @@
 import torch
 
-_device = None  # internal cache
-
+_device = None  # Internal cache to prevent repeated device checks/prints
 
 def get_device():
     """Determine and return the best available device for PyTorch computations."""
