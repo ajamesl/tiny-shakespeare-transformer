@@ -35,7 +35,6 @@ tiny-shakespeare-generator/
 │   └── tiny_shakespeare.pt # Trained model
 ├── templates/             # HTML templates
 │   └── index.html        # Modern web interface
-├── static/               # Static files (CSS, JS, images)
 ├── Dockerfile            # Docker configuration
 ├── docker-compose.yml    # Docker Compose setup
 ├── .dockerignore         # Docker ignore rules
