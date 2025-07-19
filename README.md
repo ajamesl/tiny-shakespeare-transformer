@@ -1,4 +1,4 @@
-# 🎭 Tiny Shakespeare Generator
+# 🎭 Tiny Shakespeare Transformer
 
 A FastAPI web application that generates a short Shakespearean dialogue using a trained transformer model.
 
