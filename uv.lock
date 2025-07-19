@@ -406,7 +406,7 @@ wheels = [
 ]
 
 [[package]]
-name = "tiny-shakespeare-generator"
+name = "tiny-shakespeare-transformer"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

@@ -7,7 +7,7 @@ anyio==4.9.0
 click==8.2.1
     # via uvicorn
 fastapi==0.116.0
-    # via tiny-shakespeare-generator (pyproject.toml)
+    # via tiny-shakespeare-transformer (pyproject.toml)
 filelock==3.18.0
     # via torch
 fsspec==2025.5.1
@@ -18,7 +18,7 @@ idna==3.10
     # via anyio
 jinja2==3.1.6
     # via
-    #   tiny-shakespeare-generator (pyproject.toml)
+    #   tiny-shakespeare-transformer (pyproject.toml)
     #   torch
 markupsafe==3.0.2
     # via jinja2
@@ -68,7 +68,7 @@ pydantic==2.11.7
 pydantic-core==2.33.2
     # via pydantic
 python-multipart==0.0.20
-    # via tiny-shakespeare-generator (pyproject.toml)
+    # via tiny-shakespeare-transformer (pyproject.toml)
 setuptools==80.9.0
     # via
     #   torch
@@ -80,9 +80,9 @@ starlette==0.46.2
 sympy==1.14.0
     # via torch
 torch==2.7.1
-    # via tiny-shakespeare-generator (pyproject.toml)
+    # via tiny-shakespeare-transformer (pyproject.toml)
 tqdm==4.67.1
-    # via tiny-shakespeare-generator (pyproject.toml)
+    # via tiny-shakespeare-transformer (pyproject.toml)
 triton==3.3.1
     # via torch
 typing-extensions==4.14.1
@@ -96,4 +96,4 @@ typing-extensions==4.14.1
 typing-inspection==0.4.1
     # via pydantic
 uvicorn==0.35.0
-    # via tiny-shakespeare-generator (pyproject.toml)
+    # via tiny-shakespeare-transformer (pyproject.toml)
