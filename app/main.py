@@ -7,6 +7,7 @@ from typing import Union
 
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -20,7 +21,11 @@ app = FastAPI(
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "..", "templates"))
+PROJECT_ROOT = os.path.dirname(BASE_DIR)
+templates = Jinja2Templates(directory=os.path.join(PROJECT_ROOT, "templates"))
+
+# Mount static files
+app.mount("/static", StaticFiles(directory=os.path.join(PROJECT_ROOT, "static")), name="static")
 
 
 @app.get("/", response_class=HTMLResponse)
